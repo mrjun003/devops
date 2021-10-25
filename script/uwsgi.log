@@ -49,3 +49,15 @@ Bad Request: /
 Invalid HTTP_HOST header: '192.168.8.156:8002'. You may need to add '192.168.8.156' to ALLOWED_HOSTS.
 Bad Request: /favicon.ico
 [pid: 4470|app: 0|req: 1/4] 192.168.86.219 () {40 vars in 698 bytes} [Mon Oct 25 07:53:34 2021] GET /favicon.ico => generated 57819 bytes in 111 msecs (HTTP/1.1 400) 3 headers in 116 bytes (1 switches on core 0)
+Invalid HTTP_HOST header: '192.168.8.156:8001'. You may need to add '192.168.8.156' to ALLOWED_HOSTS.
+Bad Request: /
+[pid: 4471|app: 0|req: 1/5] 192.168.86.219 () {36 vars in 684 bytes} [Mon Oct 25 10:34:22 2021] GET / => generated 57362 bytes in 122 msecs (HTTP/1.1 400) 3 headers in 116 bytes (1 switches on core 0)
+Invalid HTTP_HOST header: '192.168.8.156:8001'. You may need to add '192.168.8.156' to ALLOWED_HOSTS.
+Bad Request: /favicon.ico
+[pid: 4467|app: 0|req: 2/6] 192.168.86.219 () {36 vars in 642 bytes} [Mon Oct 25 10:34:23 2021] GET /favicon.ico => generated 57430 bytes in 131 msecs (HTTP/1.1 400) 3 headers in 116 bytes (1 switches on core 0)
+Invalid HTTP_HOST header: '192.168.8.156:8002'. You may need to add '192.168.8.156' to ALLOWED_HOSTS.
+Bad Request: /
+[pid: 4468|app: 0|req: 2/7] 192.168.86.219 () {40 vars in 740 bytes} [Mon Oct 25 10:34:27 2021] GET / => generated 57751 bytes in 187 msecs (HTTP/1.1 400) 3 headers in 116 bytes (1 switches on core 0)
+Invalid HTTP_HOST header: '192.168.8.156:8002'. You may need to add '192.168.8.156' to ALLOWED_HOSTS.
+Bad Request: /favicon.ico
+[pid: 4469|app: 0|req: 2/8] 192.168.86.219 () {40 vars in 698 bytes} [Mon Oct 25 10:34:27 2021] GET /favicon.ico => generated 57819 bytes in 107 msecs (HTTP/1.1 400) 3 headers in 116 bytes (1 switches on core 0)

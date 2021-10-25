@@ -1,2 +1,4 @@
 192.168.86.219 - - [25/Oct/2021:15:53:33 +0800] "GET / HTTP/1.1" 400 57812 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/94.0.4606.81 Safari/537.36" "-"
 192.168.86.219 - - [25/Oct/2021:15:53:34 +0800] "GET /favicon.ico HTTP/1.1" 400 57895 "http://192.168.8.156:8002/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/94.0.4606.81 Safari/537.36" "-"
+192.168.86.219 - - [25/Oct/2021:18:34:27 +0800] "GET / HTTP/1.1" 400 57812 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/94.0.4606.81 Safari/537.36" "-"
+192.168.86.219 - - [25/Oct/2021:18:34:27 +0800] "GET /favicon.ico HTTP/1.1" 400 57895 "http://192.168.8.156:8002/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/94.0.4606.81 Safari/537.36" "-"
