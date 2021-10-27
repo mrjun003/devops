@@ -1,15 +1,46 @@
 // The Vue build version to load with the `import` command
 // (runtime-only or standalone) has been set in webpack.base.conf with an alias.
 import Vue from 'vue'
-import App from './App'
-import router from './router'
+import VueRouter from 'vue-router'
+import ElementUI from 'element-ui'
+import 'element-ui/lib/theme-chalk/index.css'
+import App from './App.vue'
+import GlobalTools from './plugins/globalTools'
+import routes from './router'
+import './assets/styles/font-awesome.min.css'
+import 'normalize.css/normalize.css'
+import 'default-passive-events'
+import VueClipboard from 'vue-clipboard2'
+import $ from 'jquery'
+// import Astrict from './assets/js/astrict.js'
+import Common from './assets/js/common'
 
-Vue.config.productionTip = false
+Vue.prototype.common = Common
+Vue.use(VueClipboard);
+Vue.use(VueRouter);
+Vue.use(ElementUI);
+// Vue.use(Astrict);
 
-/* eslint-disable no-new */
+// Vue.config.productionTip = false
+
+
+const router = new VueRouter({
+  mode: 'history',
+  routes
+});
+
+
+Vue.use(GlobalTools, router);
+
 new Vue({
-  el: '#app',
   router,
-  components: { App },
-  template: '<App/>'
-})
+  el: '#app',
+  render: h => h(App)
+});
+
+// new Vue({
+//   router,
+//   el: '#app',
+//   components: { App },
+//   template: '<App/>'
+// })
