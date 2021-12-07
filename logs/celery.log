@@ -5411,3 +5411,32 @@ User information: uid=0 euid=0 gid=0 egid=0
 [2021-12-07 17:33:15,509: INFO/ForkPoolWorker-1] Task inst.tasks.checkInstAlived[6bedfbca-21ac-4604-a18c-420af526a07b] succeeded in 0.632208505179733s: None
 [2021-12-07 17:34:14,925: INFO/MainProcess] Received task: inst.tasks.checkInstAlived[a9c99327-158c-460e-85f8-d0ea0ccad9a6]  
 [2021-12-07 17:34:15,567: INFO/ForkPoolWorker-1] Task inst.tasks.checkInstAlived[a9c99327-158c-460e-85f8-d0ea0ccad9a6] succeeded in 0.6392235346138477s: None
+[2021-12-07 17:35:14,977: INFO/MainProcess] Received task: inst.tasks.checkInstAlived[f00f049d-dd31-4e44-bd00-ed02b808783f]  
+[2021-12-07 17:35:15,617: INFO/ForkPoolWorker-1] Task inst.tasks.checkInstAlived[f00f049d-dd31-4e44-bd00-ed02b808783f] succeeded in 0.6374590871855617s: None
+[2021-12-07 17:36:14,990: INFO/MainProcess] Received task: inst.tasks.checkInstAlived[33a18e26-0f91-411b-a046-2f80dc1a8abc]  
+[2021-12-07 17:36:15,604: INFO/ForkPoolWorker-1] Task inst.tasks.checkInstAlived[33a18e26-0f91-411b-a046-2f80dc1a8abc] succeeded in 0.6119370418600738s: None
+
+worker: Cold shutdown (MainProcess)
+ 
+ -------------- celery@L-AP-8-156 v4.4.2 (cliffs)
+--- ***** ----- 
+-- ******* ---- Linux-3.10.0-1062.el7.x86_64-x86_64-with-glibc2.17 2021-12-06 19:03:31
+- *** --- * --- 
+- ** ---------- [config]
+- ** ---------- .> app:         devops:0x7fbd7fcebac0
+- ** ---------- .> transport:   redis://127.0.0.1:6379/8
+- ** ---------- .> results:     redis://127.0.0.1:6379/7
+- *** --- * --- .> concurrency: 2 (prefork)
+-- ******* ---- .> task events: OFF (enable -E to monitor tasks in this worker)
+--- ***** ----- 
+ -------------- [queues]
+                .> celery           exchange=celery(direct) key=celery
+                
+
+[tasks]
+  . devops.celery.debug_task
+  . inst.tasks.checkInstAlived
+  . inst.tasks.execCommand
+  . inst.tasks.execSql
+  . inst.tasks.test
+
