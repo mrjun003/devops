@@ -13,6 +13,19 @@ from Crypto.Cipher import AES
 import base64
 from django.conf import settings
 import math
+import time
+from ast import literal_eval
+
+#时间戳转日期
+def int2Date(oldTime):
+    timeArray = time.localtime(oldTime)
+    otherStyleTime = time.strftime("%Y-%m-%d %H:%M:%S", timeArray)
+    return otherStyleTime
+
+def str2List(oldStr):
+    # newList = oldStr.strip('[').strip(']').replace('\'','').split(',')
+    newList = literal_eval(oldStr)
+    return newList
 
 #拼装dic
 def toDic(nameList ,dataList):

@@ -19,7 +19,8 @@ class AuthenticationMiddleware(MiddlewareMixin):
     """
     def process_request(self, request):
         url = request.path
-        if url != '/account/users/login/' and url != '/account/users/logout/':
+        # print('Url:',url)
+        if url != '/account/users/login/':
             access_token = request.headers.get('x-token') or request.GET.get('x-token')
             if access_token and len(access_token) == 32:
                 user = User.objects.filter(token=access_token).first()

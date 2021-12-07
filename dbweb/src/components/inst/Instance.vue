@@ -3,26 +3,36 @@
     <el-row>
       <el-col :span="20">
         <el-form :inline="true" :model="filters">
-          <el-form-item label="实例名：">
-            <el-input v-model="filters.inst_name" placeholder="实例名"></el-input>
+          <el-form-item label="实例名:">
+            <el-input v-model="filters.inst_name" placeholder="实例名" style="width:140px"></el-input>
           </el-form-item>
-          <el-form-item label="实例类型：">
-            <el-select v-model="filters.inst_type" placeholder="请选择">
+          <el-form-item label="实例类型:">
+            <el-select v-model="filters.inst_type" placeholder="请选择" style="width:140px">
+              <el-option lable="ALL" value="ALL"></el-option>
               <el-option v-for="item in inst_type_options" :key="item.value" :label="item.label" :value="item.value">
               </el-option>
             </el-select>
           </el-form-item>
-          <el-form-item label="IP：">
-            <el-input v-model="filters.inst_ip" placeholder="ip"></el-input>
+          <el-form-item label="IP:">
+            <el-input v-model="filters.inst_ip" placeholder="ip" style="width:140px"></el-input>
           </el-form-item>
-          <el-form-item label="所属应用：">
-            <el-input v-model="filters.inst_apps" placeholder="所属应用"></el-input>
+          <el-form-item label="所属应用:">
+            <el-input v-model="filters.inst_apps" placeholder="所属应用" style="width:140px"></el-input>
           </el-form-item>
-          <el-form-item label="实例状态：">
-            <el-select v-model="filters.db_status" placeholder="请选择">
+          <el-form-item label="实例状态:">
+            <el-select v-model="filters.db_status" placeholder="请选择" style="width:140px">
+              <el-option lable="ALL" value="ALL">
+              </el-option>
               <el-option label="Running" value="Running">
               </el-option>
               <el-option label="Stop" value="Stop">
+              </el-option>
+            </el-select>
+          </el-form-item>
+          <el-form-item label="群组:">
+            <el-select v-model="filters.cluster_id" placeholder="请选择" style="width:140px">
+              <el-option lable="ALL" value="ALL"></el-option>
+              <el-option v-for="item in inst_cluster_options" :key="item.value" :label="item.label" :value="item.value">
               </el-option>
             </el-select>
           </el-form-item>
@@ -32,8 +42,8 @@
         </el-form>
       </el-col>
       <el-col :span="4" style="text-align: right">
-        <el-button style="float: right" type="primary"
-                   @click="handleAdd()" v-if="bnt_add_inst">添加实例
+        <el-button style="float: right" type="primary" :disabled="bntInstAdd"
+                   @click="handleAdd()">添加实例
         </el-button>
       </el-col>
     </el-row>
@@ -51,23 +61,20 @@
         </template>
       </el-table-column>
       <el-table-column prop="db_role" label="角色" sortable width="90"></el-table-column>
-      <el-table-column prop="is_cluster" label="是否集群" width="90"></el-table-column>
+      <el-table-column prop="cluster_id" label="是否群组" width="90">
+        <template slot-scope="scope">
+          {{ scope.row.cluster_id == 0 ? '否':'是' }}
+        </template>
+      </el-table-column>
       <el-table-column prop="apps" label="应用"></el-table-column>
       <el-table-column prop="db_version" label="版本"></el-table-column>
       <el-table-column label="操作" width="220">
         <template slot-scope="scope">
-<!--          <el-button v-if="has_permission('account_user_edit')" size="small" @click="handleEdit(scope.$index, scope.row)">编辑</el-button>-->
-<!--          <el-button v-if="has_permission('account_user_disable') && scope.row.is_active" size="small"-->
-<!--                     type="danger" :loading="btnDelLoading[scope.row.id]" @click="handleDisable(scope.$index, scope.row)">禁用-->
-<!--          </el-button>-->
-<!--          <el-button  v-if="has_permission('account_user_disable') && scope.row.is_active != 1" size="small"-->
-<!--                      type="success" :loading="btnDelLoading[scope.row.id]" @click="handleDisable(scope.$index, scope.row)">启用-->
-<!--          </el-button>-->
-<!--          <el-button v-if="has_permission('account_user_disable')" size="small" type="warning" @click="RestPwd(scope.$index, scope.row)">重置密码-->
-<!--          </el-button>-->
-          <el-button type="primary" size="small" @click="instDetail(scope.row.id,scope.row.inst_type)">详情</el-button>
-          <el-button type="info" size="small" @click="instEdit(scope.row.id)">编辑</el-button>
-          <el-button type="danger" size="small" @click="instDelete(scope.row.id ,scope.row.inst_ip)">删除</el-button>
+          <el-button type="primary" size="small" :disabled="scope.row.db_status=='Running' ?false:true"
+                     @click="instDetail(scope.row.id,scope.row.db_role,scope.row.inst_type)">详情</el-button>
+          <el-button type="info" size="small" @click="instEdit(scope.row.id)" disabled>编辑</el-button>
+          <el-button type="danger" size="small" :disabled="bntInstdel"
+                     @click="instDelete(scope.row.id ,scope.row.inst_ip)">删除</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -86,6 +93,20 @@
     <el-dialog :title="addFormTitle" visible v-if="dialogShow" @close="dialogShow = false"
                :close-on-click-modal="false" width="70%">
       <el-form ref="addForm" :model="addForm" :rules="rules" label-width="80px">
+        <el-row>
+          <el-col :span="8">
+            <el-form-item prop="cluster_id" label="群组" required>
+            <el-select v-model="addForm.cluster_id" placeholder="请选择" @change="changeShh_con">
+              <el-option v-for="item in inst_cluster_options" :key="item.value" :label="item.label" :value="item.value">
+              </el-option>
+            </el-select>
+          </el-form-item>
+          </el-col>
+          <el-col :span="16">
+            <el-button type="text" style="margin:auto 0px auto 10px;"
+                       @click="addCluster()">添加群组</el-button>
+          </el-col>
+        </el-row>
         <el-form-item prop="inst_type" label="实例类型" required>
           <el-select v-model="addForm.inst_type" placeholder="请选择" @change="changeShh_con">
             <el-option v-for="item in inst_type_options" :key="item.value" :label="item.label" :value="item.value">
@@ -198,7 +219,8 @@
       };
 
       return {
-        bnt_add_inst:false,
+        bntInstAdd:false,
+        bntInstdel:false,
         isNeed:false,
         ssh_pw:'ssh_password',
         filters: {
@@ -214,6 +236,7 @@
           {label:'Mysql',value:'Mysql'},
           {label:'Rds',value:'Rds'},
         ],
+        inst_cluster_options:[],
         dialogShow: false,
         tableData: {data:[],
           total:0
@@ -235,6 +258,7 @@
           ssh_port:'',
           inst_type:'',
           apps:'',
+          cluster_id: 0,
         },
         rules: {
           inst_ip: [
@@ -245,6 +269,9 @@
           ],
           inst_type: [
             {required: true, message: '请选择实例类型', trigger: 'blur'}
+          ],
+          cluster_id: [
+            {required: true, message: '请选择所属集群', trigger: 'blur'}
           ],
           apps: [
             {required: true, message: '请输入所属应用', trigger: 'blur'}
@@ -261,6 +288,37 @@
       }
     },
     methods: {
+      //添加群组
+      addCluster() {
+          this.$prompt('请输入群组名', '添加群组', {
+            confirmButtonText: '确定',
+            cancelButtonText: '取消',
+            inputPattern: /^[\s\S]*.*[^\s][\s\S]*$/,
+            inputErrorMessage: '请输入群组名',
+          }).then(({ value }) => {
+              this.$http.post('/api/inst/addcluster/', {cluster_name:value}).then(res => {
+                this.$layer_message(res.result, 'success');
+                this.getCluster()
+              }, response => {
+                this.$layer_message(response.result, 'error');
+              }).finally(() => {
+              }).catch((e) => {})
+          }).catch(() => {
+            this.$message({
+              type: 'warning',
+              message: '取消添加群组'
+            });
+          });
+      },
+      //获取群组
+      getCluster(){
+        this.$http.get('/api/inst/getcluster/',this.filters).then(res => {
+          this.inst_cluster_options = res.result;
+          console.log(this.inst_cluster_options)
+        }, response => {
+          this.error = response.result
+        })
+      },
       //根据添加实例类型改变添加表单
       changeShh_con() {
         if (this.addForm.inst_type=='Rds'){
@@ -280,7 +338,7 @@
           this.tableData = res.result
         }, response => {
           this.error = response.result
-        }).finally(() => this.listLoading = false)
+        }).finally(() => {this.listLoading = false;})
       },
 
       //添加实例
@@ -351,14 +409,14 @@
       },
 
       //实例详情
-      instDetail(instId ,instType){
+      instDetail(instId ,dbRole ,instType){
         if (instType=='Oracle'){
           var detailtUrl = this.$router.resolve({
-            path:"/detail/inst/oradetail", query:{instId: instId}
+            path:"/detail/inst/oradetail", query:{instId: instId,dbRole: dbRole}
           })
         }else{
           var detailtUrl = this.$router.resolve({
-            path:"/detail/inst/mysqldetail", query:{instId: instId}
+            path:"/detail/inst/mysqldetail", query:{instId: instId,dbRole: dbRole}
           })
         }
         window.open(detailtUrl.href)
@@ -410,8 +468,10 @@
       }
     },
     mounted() {
-      this.bnt_add_inst = this.common.has_permission('operate_inst_add')
-      this.getInstances()
+      this.bntInstAdd = this.common.has_permission('operate_inst_add');
+      this.bntInstdel = this.common.has_permission('operate_inst_del');
+      this.getInstances();
+      this.getCluster();
     }
   }
 </script>

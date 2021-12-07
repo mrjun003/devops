@@ -5,6 +5,7 @@ import inst_routes from './components/inst/routes'
 import Mysqldetail from './components/inst/Mysqldetail.vue'
 import Oradetail from './components/inst/Oradetail.vue'
 import devops_routes from './components/devops/routes'
+import SwitchOraDetail from "./components/devops/SwitchOraDetail";
 
 
 const routes = [
@@ -58,8 +59,11 @@ export default [
     path: '/detail/inst/mysqldetail',
     name: 'mysqldetail',
     component: Mysqldetail
-  },
-  {
+  }, {
+    path: '/devops/switch/oraadg',
+    name: 'switchoraadg',
+    component: SwitchOraDetail
+  }, {
     path: '/',
     component: Layout,
     // redirect: '/home',

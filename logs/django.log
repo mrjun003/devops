@@ -1,0 +1,12 @@
+[INFO][2021-12-07 16:13:59,890][57] : admin:{'sql': 'create user user01 identified by "ora123" default tablespace TT temporary tablespace TEMP;', 'reason': '', 'status': 'Successed', 'pct': 25}
+[INFO][2021-12-07 16:13:59,921][57] : admin:{'sql': ' grant connect,unlimited tablespace to user01;', 'reason': '', 'status': 'Successed', 'pct': 50}
+[INFO][2021-12-07 16:13:59,951][57] : admin:{'sql': 'grant CONNECT,RESOURCE to user01;', 'reason': '', 'status': 'Successed', 'pct': 75}
+[INFO][2021-12-07 16:13:59,964][57] : admin:{'sql': 'grant resource to user01;', 'reason': '', 'status': 'Successed', 'pct': 100}
+[INFO][2021-12-07 16:14:31,199][57] : admin:{'sql': 'drop user USER01 cascade;', 'reason': '', 'status': 'Successed', 'pct': 100}
+[INFO][2021-12-07 16:19:08,863][57] : admin:{'sql': 'drop user T cascade;', 'reason': '', 'status': 'Successed', 'pct': 100}
+[INFO][2021-12-07 16:23:53,176][57] : admin:{'sql': "create user user01@'%' identified by '11111111';", 'reason': '', 'status': 'Successed', 'pct': 34}
+[INFO][2021-12-07 16:23:53,334][57] : admin:{'sql': "grant select on db01.* to user01@'%';", 'reason': '', 'status': 'Successed', 'pct': 67}
+[INFO][2021-12-07 16:23:53,518][57] : admin:{'sql': "grant select on db02.* to user01@'%';", 'reason': '', 'status': 'Successed', 'pct': 100}
+[INFO][2021-12-07 16:24:28,605][57] : admin:{'sql': 'create database `db03`  DEFAULT CHARACTER SET utf8mb4;', 'reason': '', 'status': 'Successed', 'pct': 50}
+[INFO][2021-12-07 16:24:28,797][57] : admin:{'sql': "grant all privileges on db03.* to user01@'%';", 'reason': '', 'status': 'Successed', 'pct': 100}
+[INFO][2021-12-07 16:26:10,256][57] : admin:{'sql': 'kill 788968;', 'reason': '', 'status': 'Successed', 'pct': 100}

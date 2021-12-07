@@ -1,5 +1,5 @@
 """
-WSGI config for devops project.
+WSGI config for db project.
 
 It exposes the WSGI callable as a module-level variable named ``application``.
 

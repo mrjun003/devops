@@ -35,13 +35,8 @@ def login(request):
 def logout(request):
     access_token = request.headers.get('x-token') or request.GET.get('x-token')
     user = User.objects.filter(token=access_token).first()
-    if user:
-        user.token_expired = 0
-        user.token = ''
-        user.save()
-        return json_response()
-    else:
-        response = json_response(message="无效登录，请重新登录")
-        response.status_code = 401
-        return response
+    user.token_expired = 0
+    user.token = ''
+    user.save()
+    return json_response()
 

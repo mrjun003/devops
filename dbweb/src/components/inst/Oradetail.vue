@@ -4,261 +4,85 @@
       <el-tab-pane label="基本信息" name="info">
         <OrabaseInfo :instId="this.instId" ref="orabaseinfo"></OrabaseInfo>
       </el-tab-pane>
-      <el-tab-pane label="用户" name="user">
-        <el-row>
-          <el-col>
-            <el-button style="float: right;" type="primary" @click="userAdd()">创建用户
-            </el-button>
-          </el-col>
-        </el-row>
-        <el-row :gutter="20">
-          <Orausers :instId="this.instId" ref="orausers"></Orausers>
-        </el-row>
-      </el-tab-pane>
       <el-tab-pane label="会话统计" name="session">
         <el-row>
-          <Oraactivsession :instId="this.instId" ref="oraactivsession"></Oraactivsession>
+          <Oraactivsession :instId="this.instId" @showExecSql="ShowExecSql" ref="oraactivsession"></Oraactivsession>
         </el-row>
         <el-row>
           <el-col :span="13">
             <Oraconnsession :instId="this.instId" ref="oraconnsession"></Oraconnsession>
           </el-col>
           <el-col :span="10" style="margin-left: 15px">
-            <el-divider ><span class="span">会话连接使用情况</span></el-divider>
-            <el-table :data="resourceSessionTableData" stripe border
-                      v-loading="listLoading" style="width: 100%">
-              <el-table-column type="index" width="60"></el-table-column>
-              <el-table-column prop="name" label="name" ></el-table-column>
-              <el-table-column prop="current" label="当前连接数"></el-table-column>
-              <el-table-column prop="max" label="最大使用连接数"></el-table-column>
-              <el-table-column prop="init" label="可分配连接数"></el-table-column>
-              <el-table-column prop="limit" label="最大连接数"></el-table-column>
-            </el-table>
+            <Oraresourcesession :instId="this.instId" ref="oraresourcesession"></Oraresourcesession>
           </el-col>
         </el-row>
       </el-tab-pane>
       <el-tab-pane label="锁查看" name="lock">
         <el-row>
-          <el-divider ><span class="span">锁等待</span></el-divider>
-          <el-col :span="24">
-            <el-table :data="lockTableData" stripe border v-loading="listLoading" style="width: 100%" max-height="500">
-              <el-table-column type="index" width="40"></el-table-column>
-              <el-table-column prop="sid" label="sid" ></el-table-column>
-              <el-table-column prop="serial#" label="serial#" ></el-table-column>
-              <el-table-column prop="username" label="username"></el-table-column>
-              <el-table-column prop="machine" label="machine"></el-table-column>
-              <el-table-column prop="status" label="status"></el-table-column>
-              <el-table-column prop="sql_id" label="sql_id"></el-table-column>
-              <el-table-column prop="owner" label="owner"></el-table-column>
-              <el-table-column prop="object_name" label="object_name"></el-table-column>
-              <el-table-column prop="locked_mode" label="locked_mode"></el-table-column>
-            </el-table>
-          </el-col>
+          <Oralockwaite :instId="this.instId" @showExecSql="ShowExecSql" ref="oralockwaite"></Oralockwaite>
         </el-row>
         <el-row>
-          <el-divider ><span class="span">会话阻塞</span></el-divider>
-          <el-col :span="24">
-            <el-table :data="blockTableData" stripe border v-loading="listLoading" style="width: 100%" max-height="500">
-              <el-table-column type="index" width="40"></el-table-column>
-              <el-table-column prop="sid" label="被阻塞会话" ></el-table-column>
-              <el-table-column prop="sess_serial#" label="sess_serial#" ></el-table-column>
-              <el-table-column prop="wait_id" label="wait_id"></el-table-column>
-              <el-table-column prop="wait_event" label="wait_event"></el-table-column>
-              <el-table-column prop="wait_event_text" label="wait_event_text"></el-table-column>
-              <el-table-column prop="blocker_instance_id" label="造成阻塞会话实例"></el-table-column>
-              <el-table-column prop="blocker_sid" label="造成阻塞会话"></el-table-column>
-              <el-table-column prop="blocker_sess_serial#" label="blocker_sess_serial#"></el-table-column>
-            </el-table>
-          </el-col>
+          <Orablocksession :instId="this.instId" @showExecSql="ShowExecSql" ref="orablockwaite"></Orablocksession>
+        </el-row>
+      </el-tab-pane>
+      <el-tab-pane label="用户" name="user">
+        <el-row :gutter="20">
+          <Orausers :instId="this.instId" :dbRole="this.dbRole" @showExecSql="ShowExecSql" ref="orausers"></Orausers>
         </el-row>
       </el-tab-pane>
       <el-tab-pane label="表空间查看" name="tablespace">
         <el-row>
-          <el-col>
-            <el-button style="float: right;margin-bottom: 10px" type="primary"
-                       @click="dialogTablespaceShow = true" :disabled="db_role=='PRIMARY' ? false:true">新建表空间
-            </el-button>
-          </el-col>
+          <Oratablespace :instId="this.instId" :dbRole="this.dbRole" @showExecSql="ShowExecSql" ref="oratablespace"></Oratablespace>
         </el-row>
         <el-row>
-          <el-divider ><span class="span">表空间使用情况</span></el-divider>
-          <el-col :span="24">
-            <el-table :data="tablespaceTableData" stripe border v-loading="listLoading" style="width: 100%" max-height="500">
-              <el-table-column type="index" width="40"></el-table-column>
-              <el-table-column prop="tablespace_name" label="表空间名" ></el-table-column>
-              <el-table-column prop="total_gb" label="总大小（GB）" ></el-table-column>
-              <el-table-column prop="used_gb" label="使用大小（GB）"></el-table-column>
-              <el-table-column prop="free_gb" label="剩余大小（GB）">
-                <template slot-scope="scope">
-                  <el-tag :type="scope.row.used_pct > 90 && scope.row.free_gb < 10 ?  'danger' : 'success'" size="small">
-                    {{ scope.row.free_gb }}
-                  </el-tag>
-                </template>
-              </el-table-column>
-              <el-table-column prop="used_pct" label="使用率（%）">
-                <template slot-scope="scope">
-                  <el-tag :type="scope.row.used_pct > 90 && scope.row.free_gb < 10 ?  'danger' : 'success'" size="small">
-                    {{ scope.row.used_pct }}
-                  </el-tag>
-                </template>
-              </el-table-column>
-              <el-table-column label="操作" with="150">
-                <template slot-scope="scope">
-                  <el-button type="primary" size="small" @click="">使用详情</el-button>
-                  <el-button type="danger" size="small" @click="" :disabled="db_role=='PRIMARY' ? false:true">扩展</el-button>
-                </template>
-              </el-table-column>
-            </el-table>
-          </el-col>
+          <Oradatafilesize :instId="this.instId" :dbRole="this.dbRole" @showExecSql="ShowExecSql" ref="oradatafilesize"></Oradatafilesize>
         </el-row>
       </el-tab-pane>
       <el-tab-pane label="对象统计" name="object">
         <el-row>
           <el-col :span="15">
-            <el-divider ><span class="span">占用空间前30的对象</span></el-divider>
-            <el-table :data="segmentTableData" stripe border v-loading="listLoading" style="width: 100%" max-height="500">
-              <el-table-column type="index" width="60"></el-table-column>
-              <el-table-column prop="owner" label="用户" ></el-table-column>
-              <el-table-column prop="segment_name" label="对象名" ></el-table-column>
-              <el-table-column prop="segment_type" label="对象类型"></el-table-column>
-              <el-table-column prop="size" label="对象大小（GB）" width="140px">
-                <template slot-scope="scope">
-                  <el-tag :type="scope.row.size >= 10 ?  'danger' : 'success'" size="small">
-                    {{ scope.row.size }}
-                  </el-tag>
-                </template>
-              </el-table-column>
-            </el-table>
+            <oraobjectsize :instId="this.instId" ref="oraobjectsize"></oraobjectsize>
           </el-col>
           <el-col :span="8" style="margin-left: 15px">
-            <el-divider ><span class="span">各用户占用空间大小</span></el-divider>
-            <el-table :data="usersegmentTableData" stripe border v-loading="listLoading" style="width: 100%" max-height="500">
-              <el-table-column type="index" width="60"></el-table-column>
-              <el-table-column prop="user" label="用户" ></el-table-column>
-              <el-table-column prop="size" label="使用大小（GB）" width="140px"></el-table-column>
-            </el-table>
+            <orausersize :instId="this.instId" ref="orausersize"></orausersize>
           </el-col>
         </el-row>
         <el-row>
-          <el-divider ><span class="span">分区表统计</span></el-divider>
-          <el-table :data="parttableTableData" stripe border v-loading="listLoading" style="width: 100%" max-height="500">
-                <el-table-column type="index" width="60"></el-table-column>
-                <el-table-column prop="table_owner" label="用户" ></el-table-column>
-                <el-table-column prop="table_name" label="表名" ></el-table-column>
-                <el-table-column prop="parttion_name" label="表分区名"></el-table-column>
-                <el-table-column prop="high_value" label="分区最大值"></el-table-column>
-                <el-table-column prop="partition_position" label="分区位"></el-table-column>
-              </el-table>
+          <oraparttabsize :instId="this.instId" ref="oraparttabsize"></oraparttabsize>
         </el-row>
         <el-row>
-          <el-divider ><span class="span">表碎片率高于70%</span></el-divider>
-          <el-table :data="tabChipTableData" stripe border v-loading="listLoading" style="width: 100%" max-height="500">
-            <el-table-column type="index" width="60"></el-table-column>
-            <el-table-column prop="owner" label="用户" ></el-table-column>
-            <el-table-column prop="table_name" label="表名" ></el-table-column>
-            <el-table-column prop="theory_size" label="理论大小（MB）"></el-table-column>
-            <el-table-column prop="true_size" label="实际大小（MB）"></el-table-column>
-            <el-table-column prop="used_pct" label="使用率（%）"></el-table-column>
-          </el-table>
+          <Oratabchip :instId="this.instId" ref="oratabchip"></Oratabchip>
         </el-row>
       </el-tab-pane>
       <el-tab-pane label="统计信息" name="statics">
         <el-row>
-          <el-divider ><span class="span">统计信息失效表</span></el-divider>
-          <el-table :data="tablestaticsTableData" stripe border v-loading="listLoading" style="width: 100%" max-height="500">
-            <el-table-column type="index" width="60"></el-table-column>
-            <el-table-column prop="owner" label="用户" ></el-table-column>
-            <el-table-column prop="table_name" label="表名" ></el-table-column>
-            <el-table-column prop="object_type" label="表类型"></el-table-column>
-            <el-table-column prop="last_analyzed" label="最后收集时间"></el-table-column>
-            <el-table-column prop="stale_stats" label="是否过期"></el-table-column>
-          </el-table>
+          <Oratabstatics :instId="this.instId" ref="oratabstatics"></Oratabstatics>
         </el-row>
         <el-row>
-          <el-divider ><span class="span">统计信息失效索引</span></el-divider>
-          <el-table :data="indexstaticsTableData" stripe border v-loading="listLoading" style="width: 100%" max-height="500">
-            <el-table-column type="index" width="60"></el-table-column>
-            <el-table-column prop="owner" label="用户" ></el-table-column>
-            <el-table-column prop="index_name" label="索引名" ></el-table-column>
-            <el-table-column prop="table_owner" label="表用户"></el-table-column>
-            <el-table-column prop="table_name" label="表名"></el-table-column>
-            <el-table-column prop="last_analyzed" label="最后收集时间"></el-table-column>
-            <el-table-column prop="stale_stats" label="是否过期"></el-table-column>
-          </el-table>
+          <OraIndstatics :instId="this.instId" ref="oraindstatics"></OraIndstatics>
         </el-row>
         <el-row>
-          <el-divider ><span class="span">失效原因</span></el-divider>
-          <el-table :data="stalereasondataTableData" stripe border v-loading="listLoading" style="width: 100%" max-height="500">
-            <el-table-column type="index" width="60"></el-table-column>
-            <el-table-column prop="table_owner" label="表用户"></el-table-column>
-            <el-table-column prop="table_name" label="表名"></el-table-column>
-            <el-table-column prop="inserts" label="插入数"></el-table-column>
-            <el-table-column prop="updates" label="更新数"></el-table-column>
-            <el-table-column prop="deletes" label="删除数"></el-table-column>
-            <el-table-column prop="timestamp" label="截至时间"></el-table-column>
-          </el-table>
+          <Orastale :instId="this.instId" ref="orastale"></Orastale>
         </el-row>
       </el-tab-pane>
       <el-tab-pane label="归档统计" name="archive">
         <el-row>
           <el-col :span="12">
-            <el-row>
-              <el-divider ><span class="span">最近7天归档统计</span></el-divider>
-              <el-table :data="daylyArchiveTableData" stripe border v-loading="listLoading"
-                        style="width: 100%">
-                <el-table-column type="index" width="40"></el-table-column>
-                <el-table-column prop="day" label="日期"></el-table-column>
-                <el-table-column prop="size" label="归档大小（GB）"></el-table-column>
-              </el-table>
-            </el-row>
+            <Oraarchday :instId="this.instId" ref="oraarchday"></Oraarchday>
           </el-col>
           <el-col :span="11" style="margin-left: 15px;">
-            <el-row>
-              <el-divider ><span class="span">最近48小时归档统计</span></el-divider>
-              <el-table :data="hourlyArchiveTableData" stripe border v-loading="listLoading"
-                        style="width: 100%" max-height="500">
-                <el-table-column type="index" width="40"></el-table-column>
-                <el-table-column prop="hour" label="时间"></el-table-column>
-                <el-table-column prop="size" label="归档大小（GB）"></el-table-column>
-              </el-table>
-            </el-row>
+            <Oraarchhour :instId="this.instId" ref="oraarchhour"></Oraarchhour>
           </el-col>
         </el-row>
       </el-tab-pane>
       <el-tab-pane label="慢sql" name="slow">
         <el-row>
-          <el-divider ><span class="span">执行时长前20的sql</span></el-divider>
-          <el-table :data="currentDaySlowTableData" stripe border v-loading="listLoading" style="width: 100%" max-height="500">
-            <el-table-column type="index" width="40"></el-table-column>
-            <el-table-column prop="username" label="用户" ></el-table-column>
-            <el-table-column prop="sql_id" label="sql_id" ></el-table-column>
-            <el-table-column prop="execs" label="执行次数"></el-table-column>
-            <el-table-column prop="exec_time" label="执行时长"></el-table-column>
-            <el-table-column prop="last_time" label="最后执行时间"></el-table-column>
-            <el-table-column prop="module" label="module"></el-table-column>
-            <el-table-column prop="cost" label="cost"></el-table-column>
-            <el-table-column prop="sorts" label="sorts"></el-table-column>
-            <el-table-column prop="prb" label="物理读（Bytes）"></el-table-column>
-            <el-table-column prop="pwr" label="物理写"></el-table-column>
-            <el-table-column prop="dr" label="直接路径读"></el-table-column>
-            <el-table-column prop="dw" label="直接路径写"></el-table-column>
-            <el-table-column prop="rrows" label="返回行数"></el-table-column>
-            <el-table-column prop="sql" label="sql"></el-table-column>
-          </el-table>
+          <Oraslowsql :instId="this.instId" ref="oraslowsql"></Oraslowsql>
         </el-row>
       </el-tab-pane>
       <el-tab-pane label="rman备份" name="rman">
         <el-row>
-          <el-divider ><span class="span">最近15次rman备份</span></el-divider>
-          <el-table :data="rmanTableData" stripe border v-loading="listLoading" style="width: 100%" max-height="500">
-            <el-table-column type="index" width="40"></el-table-column>
-            <el-table-column prop="start_time" label="备份开始时间" ></el-table-column>
-            <el-table-column prop="end_time" label="备份结束时间" ></el-table-column>
-            <el-table-column prop="input" label="备份输入大小（GB）"></el-table-column>
-            <el-table-column prop="output" label="备份输出大小（GB）"></el-table-column>
-            <el-table-column prop="status" label="备份状态"></el-table-column>
-            <el-table-column prop="runtime" label="备份运行时长"></el-table-column>
-          </el-table>
+          <Orarmanbackup :instId="this.instId" ref="orarmanbackup"></Orarmanbackup>
         </el-row>
       </el-tab-pane>
     </el-tabs>
@@ -273,337 +97,281 @@
                    v-clipboard:success="onCopy"
                    v-clipboard:error="onError">复制
         </el-button>
-        <el-button type="danger" @click.native="">直接执行</el-button>
+        <el-button type="danger" v-loading="execLoading" @click.once="onSubumit()">直接执行</el-button>
       </div>
     </el-dialog>
 
-    <!--新建表空间界面-->
-    <el-dialog title="新建表空间" visible v-if="dialogTablespaceShow" @close="dialogTablespaceShow = false"
-               :close-on-click-modal="false" width="50%" append-to-body>
-      <el-form ref="addTablespaceForm" :model="addTablespaceForm" :rules="rules" label-width="135px">
-        <el-row>
-          <el-col :span="8">
-            <el-form-item prop="tablespace_type" label="表空间类型" required>
-              <el-select v-model="addTablespaceForm.tablespace_type" placeholder="请选择">
-                <el-option label="Normal" value="Normal"></el-option>
-                <el-option label="Temp" value="Temp"></el-option>
-                <el-option label="Undo" value="Undo"></el-option>
-              </el-select>
-            </el-form-item>
-          </el-col>
-        </el-row>
-        <el-row>
-          <el-col :span="18">
-            <el-form-item prop="tablespace_name" label="表空间名：" required>
-              <el-input v-model="addTablespaceForm.tablespace_name" auto-complete="off">
-              </el-input>
-            </el-form-item>
-          </el-col>
-        </el-row>
-        <el-row>
-          <el-col :span="18">
-            <el-form-item prop="file_name" label="文件名：">
-              <el-input v-model="addTablespaceForm.file_name" auto-complete="off" :disabled="is_cluster">
-                <template slot="prepend">{{ defaultFileDirectory }}</template>
-              </el-input>
-            </el-form-item>
-          </el-col>
-        </el-row>
-        <el-row>
-          <el-col :span="12">
-            <el-form-item prop="size" label="文件初始大小：" required>
-              <el-input placeholder="最大32" v-model="addTablespaceForm.size">
-                <template slot="append">GB</template>
-              </el-input>
-            </el-form-item>
-          </el-col>
-        </el-row>
-        <el-row>
-          <el-col :span="24">
-            <el-form-item prop="autoextend" label="是否自动扩展：">
-              <el-radio-group v-model="addTablespaceForm.autoextend">
-                <el-radio label="off"></el-radio>
-                <el-radio label="on"></el-radio>
-              </el-radio-group>
-            </el-form-item>
-          </el-col>
-        </el-row>
-      </el-form>
-      <div slot="footer" style="text-align: center">
-        <el-button type="text" @click.native="dialogTablespaceShow = false">取消</el-button>
-        <el-button type="primary" :loading="addUserLoading" @click.native="tablespaceAdd()">生成SQL</el-button>
-      </div>
-    </el-dialog>
+    <!--sql执行过程界面-->
+    <el-dialog title="SQL执行日志" :visible.sync="dialogVisible" width="70%"
+               :close-on-click-modal="false" :close-on-press-escape="false" :show-close="false" center>
+      <el-row>
+        <span style="font-size: 16px;font-weight: 700;">执行进度条：</span>
+        <el-progress :percentage="percentage"></el-progress>
+      </el-row>
 
-    <!--新增用户界面-->
-    <el-dialog title="创建用户" visible v-if="dialogUserShow" @close="dialogUserShow = false"
-               :close-on-click-modal="false" width="60%" append-to-body>
-      <el-form ref="addForm" :model="addUserForm" :rules="rules" label-width="135px">
-        <el-row>
-          <el-col :span="8">
-            <el-form-item prop="user" label="用户：" required>
-              <el-input placeholder="请输入" v-model="addUserForm.user" auto-complete="off"></el-input>
-            </el-form-item>
-          </el-col>
-          <el-col :span="8">
-            <el-form-item prop="password" label="密码：" required>
-              <el-input v-model="addUserForm.password" show-password></el-input>
-            </el-form-item>
-          </el-col>
-          <el-col :span="8">
-            <el-form-item prop="password2" label="再次输入密码：" required>
-              <el-input v-model="addUserForm.password2" show-password></el-input>
-            </el-form-item>
-          </el-col>
-        </el-row>
-        <el-row>
-          <el-col :span="18">
-            <el-form-item prop="grant" label="权限：">
-              <el-radio-group v-model="addUserForm.grant">
-                <el-radio label="只读权限"></el-radio>
-                <el-radio label="应用权限"></el-radio>
-                <el-radio label="超级权限"></el-radio>
-              </el-radio-group>
-            </el-form-item>
-          </el-col>
-        </el-row>
-        <el-row>
-          <el-col :span="24">
-            <el-form-item prop="dbs" label="授权数据库：" required>
-              <el-transfer v-model="addUserForm.dbs" :data="all_dbs"></el-transfer>
-            </el-form-item>
-          </el-col>
-        </el-row>
-        <el-row>
-          <el-col :span="24">
-            <el-form-item prop="roles" label="角色：">
-              <el-transfer v-model="addUserForm.roles" :data="all_roles"></el-transfer>
-            </el-form-item>
-          </el-col>
-        </el-row>
-      </el-form>
-      <div slot="footer">
-        <el-button type="text" @click.native="dialogUserShow = false">取消</el-button>
-        <el-button type="primary" :loading="addUserLoading" @click.native="addUser()">保存</el-button>
-      </div>
+      <el-table :data="execSQLTableData" style="width: 100%;" border>
+        <el-table-column prop="sql" label="SQL"></el-table-column>
+        <el-table-column prop="reason" label="失败原因" width="160"></el-table-column>
+        <el-table-column prop="status" label="执行状态" width="100">
+          <template slot-scope="scope">
+            <el-tag :type="scope.row.status == 'Successed' ?  'success' : 'danger'" size="small">
+              {{ scope.row.status }}
+            </el-tag>
+          </template>
+        </el-table-column>
+      </el-table>
+      <span slot="footer" class="dialog-footer">
+        <el-button type="primary" :disabled="bntExecSql" @click.native="closeExecDialog(finished)">关闭</el-button>
+      </span>
     </el-dialog>
   </div>
 </template>
 
 <script>
-  import OrabaseInfo from './Orabaseinfo.vue'
+  import OrabaseInfo from './Orabaseinfo.vue';
   import Orausers from "./Orausers";
   import Oraactivsession from "./Oraactivsession";
   import Oraconnsession from "./Oraconnsession";
+  import Oraresourcesession from "./Oraresourcesession";
+  import Oralockwaite from "./Oralockwaite";
+  import Orablocksession from "./Orablocksession";
+  import Oratablespace from "./Oratablespace";
+  import Orarmanbackup from "./Orarmanbackup";
+  import Oraslowsql from "./Oraslowsql";
+  import Oraarchday from "./Oraarchday";
+  import Oraarchhour from "./Oraarchhour";
+  import Oraobjectsize from "./Oraobjectsize";
+  import Orausersize from "./Orausersize";
+  import Oraparttabsize from "./Oraparttabsize";
+  import Oratabchip from "./Oratabchip";
+  import Oratabstatics from "./Oratabstatics";
+  import OraIndstatics from "./OraIndstatics";
+  import Orastale from "./Orastale";
+  import Oradatafilesize from "./Oradatafilesize";
   export default {
-    components:{OrabaseInfo, Orausers, Oraactivsession, Oraconnsession},
+    components:{Oraresourcesession, OrabaseInfo, Orausers, Oraactivsession, Oraslowsql, Oraarchday,
+      Oraconnsession, Oralockwaite, Orablocksession, Oratablespace, Orarmanbackup, Oraarchhour, Oraobjectsize,
+      Orausersize, Oraparttabsize, Oratabchip, Oratabstatics, OraIndstatics, Orastale, Oradatafilesize},
     data(){
       return{
         instId:this.$route.query.instId,
+        dbRole:this.$route.query.dbRole,
+        bntExecSql: false,
+        wsServer: '',
         activeName: 'info',
-        is_cluster: true,
-        db_role: 'PRIMARY',
+        execSQLTableData:[],
+        dialogVisible:false,
+        taskId:'testid',
+        finished: false,
+        socket:'',
+
         dialogExecSqlShow: false,
         execSql: '',
-        status:false,
-        clickText:'5秒自动刷新',
+        execLoading: false,
+        percentage:0,
 
-        listLoading: false,
-
-        userTableData: [],
-        addUserForm:{},
-        addUserLoading:false,
-        dialogUserShow:false,
-
-        sessionTableData: [],
-        connTableData: [],
-        resourceSessionTableData: [],
-
-        lockTableData: [],
-        blockTableData: [],
-
-        tablespaceTableData: [],
-        addTablespaceForm: {
-          tablespace_type: 'Normal',
-          tablespace_name: '',
-          file_name: '',
-          autoextend: 'off',
-        },
-        dialogTablespaceShow: false,
-        defaultFileDirectory: '',
-
-        segmentTableData: [],
-        usersegmentTableData: [],
-        parttableTableData: [],
-        tabChipTableData: [],
-
-        tablestaticsTableData: [],
-        indexstaticsTableData: [],
-        stalereasondataTableData: [],
-
-        daylyArchiveTableData: [],
-        hourlyArchiveTableData: [],
-
-        currentDaySlowTableData: [],
-
-        rmanTableData: [],
+        userStatus: true,
+        sessionStatus: true,
+        lockStatus: true,
+        tablespaceStatus: true,
+        objectStatus: true,
+        staticsStatus: true,
+        archSratus: true,
+        slowsqlStatus: true,
+        rmanStatus: true,
       };
     },
     methods: {
+      //切换页面
       handleClick(tab, event) {
-        this.$refs.orabaseinfo.getDatabaseInfo();
-        this.getInfo(this.instId, this.activeName);
-      },
-      getInfo(instId ,tab ) {
-        if(tab=='user'){
-          this.$refs.orausers.getUsers();
-          this.userTableData = []
-        }
-        else if (tab=='session'){
-          this.sessionTableData = [];
-          this.connTableData = [];
-          this.resourceSessionTableData = [];
-        }else if (tab=='lock'){
-          this.lockTableData = [];
-          this.blockTableData = [];
-        }else if (tab=='tablespace'){
-          this.tablespaceTableData = [];
-        }else if (tab=='object'){
-          this.segmentTableData = [];
-          this.parttableTableData = [];
-          this.tabChipTableData = [];
-          this.usersegmentTableData = [];
-        }else if (tab=='statics'){
-          this.tablestaticsTableData = [];
-          this.indexstaticsTableData = [];
-          this.stalereasondataTableData = [];
-        }else if (tab=='archive'){
-          this.daylyArchiveTableData = [];
-          this.hourlyArchiveTableData = [];
-        }else if (tab=='slow'){
-          this.currentDaySlowTableData = [];
-        }else if (tab=='rman'){
-          this.rmanTableData = [];
-        }
-        this.listLoading = true
-        this.$http.get('/api/inst/getinfo/', {
-          params: {
-            id: instId,
-            tab: tab,
-          },
-          _timeout:1000,
-        }).then((res) => {
-          if(tab=='user'){this.userTableData = res.result.userdata}
-          else if (tab=='session'){
-            this.sessionTableData = res.result.activedata;
-            this.connTableData = res.result.conndata;
-            this.resourceSessionTableData = res.result.resourcesessiondata
-          }else if (tab=='lock'){
-            this.lockTableData = res.result.lockdata;
-            this.blockTableData = res.result.blockdata;
-          }else if (tab=='tablespace'){
-            this.tablespaceTableData = res.result.useddata;
-          }else if (tab=='object'){
-            this.segmentTableData = res.result.segmentdata;
-            this.parttableTableData = res.result.parttabledata;
-            this.usersegmentTableData = res.result.usersegmentdata;
-              this.tabChipTableData = res.result.tabchipdata;
-          }else if (tab=='statics'){
-            this.tablestaticsTableData = res.result.tablestaticsdata;
-            this.indexstaticsTableData = res.result.indexstaticsdata;
-            this.stalereasondataTableData = res.result.stalereasondata
-          }else if (tab=='archive'){
-            this.daylyArchiveTableData = res.result.daylyarchivedata;
-            this.hourlyArchiveTableData = res.result.hourlyarchivedata
-          }else if (tab=='slow'){
-            this.currentDaySlowTableData = res.result.currentdayslowdata;
-          }else if (tab=='rman'){
-            this.rmanTableData = res.result.rmandata;
+        if (this.activeName == 'user'){
+          if (this.userStatus) {
+            this.userStatus = false;
+            this.$refs.orausers.getUsers();
           }
-          }, (response) => {
-          this.$message({type: 'error',message: '获取信息失败，原因：' + response.result})
+        }else if (this.activeName == 'session') {
+          if (this.sessionStatus) {
+            this.sessionStatus = false;
+            this.$refs.oraconnsession.getConnSession();
+            this.$refs.oraresourcesession.getResourceSession();
+            this.$refs.oraactivsession.getActiveSessions();
           }
-        ).finally(() => {
-          this.listLoading = false
-        })
-      },
-      userAdd(){
-        this.dialogUserShow=true
-      },
-      tablespaceAdd(){
-        if (this.addTablespaceForm.tablespace_type == 'Normal'){
-          var addTablespaceSql = 'create tablespace ' + this.addTablespaceForm.tablespace_name + ' datafile \'' +
-            this.defaultFileDirectory + this.addTablespaceForm.file_name + '\' size ' + this.addTablespaceForm.size +
-            'G autoextend ' + this.addTablespaceForm.autoextend + ';'
-        }else if(this.addTablespaceForm.tablespace_type == 'Undo'){
-          var addTablespaceSql = 'create undo tablespace ' + this.addTablespaceForm.tablespace_name + ' datafile \'' +
-            this.defaultFileDirectory + this.addTablespaceForm.file_name + '\' size ' + this.addTablespaceForm.size +
-            'G autoextend ' + this.addTablespaceForm.autoextend + ';'
-        }else if(this.addTablespaceForm.tablespace_type == 'Temp'){
-          var addTablespaceSql = 'create temporary  tablespace ' + this.addTablespaceForm.tablespace_name + ' tempfile \'' +
-            this.defaultFileDirectory + this.addTablespaceForm.file_name + '\' size ' + this.addTablespaceForm.size +
-            'G autoextend ' + this.addTablespaceForm.autoextend + ';'
+        }else if (this.activeName == 'lock'){
+          if (this.lockStatus) {
+            this.lockStatus = false;
+            this.$refs.oralockwaite.getLocks();
+            this.$refs.orablockwaite.getBlocks();
+          }
+        }else if(this.activeName == 'tablespace'){
+          if(this.tablespaceStatus){
+            this.tablespaceStatus = false;
+            this.$refs.oratablespace.getTablespaceUsed();
+            this.$refs.oradatafilesize.getDataFile();
+          }
+        }else if(this.activeName == 'rman'){
+          if(this.rmanStatus){
+            this.rmanStatus = false;
+            this.$refs.orarmanbackup.getRmanInfo();
+          }
+        }else if(this.activeName == 'slow'){
+          if(this.slowsqlStatus){
+            this.slowsqlStatus = false;
+            this.$refs.oraslowsql.getSlowSql();
+          }
+        }else if(this.activeName == 'archive'){
+          if(this.archSratus){
+            this.archSratus = false;
+            this.$refs.oraarchday.getArchDay();
+            this.$refs.oraarchhour.getArchHour();
+          }
+        }else if (this.activeName == 'object'){
+          if(this.objectStatus){
+            this.$refs.oraobjectsize.getObjectSize();
+            this.$refs.orausersize.getUserSize();
+            this.$refs.oraparttabsize.getParttabSize();
+            this.$refs.oratabchip.getTabChip();
+          }
+        }else if (this.activeName == 'statics'){
+          if(this.staticsStatus){
+            this.$refs.oratabstatics.getTabStatics();
+            this.$refs.oraindstatics.getIndStatics();
+            this.$refs.orastale.getStale();
+          }
         }
-        console.log(addTablespaceSql)
-        this.execSql = addTablespaceSql
+      },
+      //刷新tab
+      // reflashTab(tab){
+      //   if(this.activeName == 'tablespace'){
+      //     this.$refs.oratablespace.reflashClick();
+      //     this.$refs.oradatafilesize.reflashClick();
+      //   }else if(this.activeName == 'lock'){
+      //     this.$refs.oralockwaite.reflashClick();
+      //     this.$refs.orablockwaite.reflashClick();
+      //   }else if(this.activeName == 'session'){
+      //     this.$refs.oraconnsession.reflashClick();
+      //     this.$refs.oraresourcesession.reflashClick();
+      //     this.$refs.oraactivsession.reflashClick();
+      //   }else if(this.activeName == 'user'){
+      //     this.$refs.orausers.reflashClick();
+      //   }
+      // },
+      //显示执行sql详情
+      ShowExecSql(data){
+        this.execSql = data
         this.dialogExecSqlShow = true
       },
-      setDefaultFileDirectory(instId ,tablespaceType){
-        this.defaultFileDirectory = '/data/oradata/'
-      },
-      killSession(){
-        var mulSel = this.$refs.sessionMultipleTable.selection
-        if(mulSel.length>0){
-          this.execSql = '';
-          for(var i=0;i<mulSel.length;i++){
-            this.execSql = this.execSql + 'alter system kill session \'' + mulSel[i].sid + ','
-              + mulSel[i].serial + '\' immediate;' + "<br/>"
-          }
-          this.dialogExecSqlShow = true
-        }else{
-          this.$message({type: 'warning',message: '您没有选中任何内容！'});
-        }
-      },
+      //复制成功
       onCopy(){
         this.$message.success('复制成功')
       },
+      //复制失败
       onError(){
         this.$message.console.error('复制失败');
       },
-      createTimer(){
-        this.timer = setInterval(() => {
-          this.getInfo(this.instId, this.activeName);
-        }, 5000);
+      //关闭执行日志窗口
+      closeExecDialog(status){
+        console.log(status);
+        console.log(this.finished);
+        if (!this.finished){
+          this.$message({
+            type: 'success',
+            message: '如果执行未完成，SQL会在后台继续执行，可通过 '+ this.taskId +' 在任务页面查看最终执行结果。'
+          });
+        };
+        this.dialogVisible = false;
+        this.dialogExecSqlShow = false;
+        this.socket.close();
+        // this.reflashTab(this.activeName);
       },
-      stopReflash() {
-        clearInterval(this.timer);
+      //执行sql
+      onSubumit(){
+        this.bntExecSql = true;
+        this.dialogVisible = true;
+        this.percentage = 0;
+        // 清空消息
+        this.execSQLTableData = []
+        // 执行webSocket
+        this.webSocket()
       },
-      reflashClick () {
-        if (this.status) {
-          this.status = false;
-          this.clickText = '5秒自动刷新'
-          this.stopReflash()
-        }else{
-          this.status=true;
-          this.clickText = '停止自动刷新'
-          this.createTimer()
+      webSocket() {
+        const _this = this;
+        if (typeof (WebSocket) == 'undefined') {
+          this.$notify({
+            title: '提示',
+            message: '当前浏览器无法接收实时报警信息，请使用谷歌浏览器！',
+            type: 'warning',
+            duration: 0
+          });
+        } else {
+          // var room_name = this.common.uuid(8,16)
+          // 实例化socket
+          // const socketUrl = 'ws://192.168.8.152:8000/ws/execsql/' + localStorage.getItem('login_user') +'/';
+          const socketUrl = _this.wsServer + '/ws/execsql/' + localStorage.getItem('login_user') +'/';
+          console.log(socketUrl)
+          this.socket = new WebSocket(socketUrl);
+          // 监听socket打开
+          this.socket.onopen = function() {
+            console.log('浏览器WebSocket已打开');
+            //发送字符:
+            _this.socket.send(JSON.stringify({
+              'id': _this.instId,
+              'sql': _this.execSql,
+              'username': localStorage.getItem('login_user'),
+            }));
+          };
+          // 监听socket消息接收
+          this.socket.onmessage = function(msg) {
+            // 追加到内容显示列表中
+            var data = msg.data
+            console.log('i am here')
+            console.log(data)
+            if(data == 'END'){
+              _this.finished = true;
+              _this.bntExecSql = false;
+            }else if(data.search("Connect the database error") != -1){
+              _this.finished = true;
+              _this.bntExecSql = false;
+              _this.$message({
+                type: 'error',
+                message: data
+              });
+            }else{
+              var tabledate = eval('('+data+')')
+              _this.execSQLTableData.push(tabledate)
+              _this.percentage = tabledate.pct
+            }
+          };
+          // 监听socket错误
+          this.socket.onerror = function() {
+            if(!this.finished){
+              this.$message({
+                type: 'success',
+                message: '如果执行未完成，SQL会在后台继续执行，可通过 '+ this.taskId +' 在任务页面查看最终执行结果。'
+              });
+              this.dialogVisible = false;
+            }
+          };
+          // 监听socket关闭
+          this.socket.onclose = function() {
+            console.log('WebSocket已关闭');
+          };
         }
-      }
+      },
     },
     watch:{
+      //监控页面切换
       activeName:function(newVal, oldVal) {
         if(newVal!='session' && oldVal == 'session'){
           this.$refs.oraactivsession.autoReflashClick(true);
+        }else if(newVal!='lock' && oldVal == 'lock'){
+          this.$refs.oralockwaite.autoReflashClick(true);
+          this.$refs.orablockwaite.autoReflashClick(true);
         }
       }
     },
     mounted() {
-      if (this.is_cluster == true){
-        this.addTablespaceForm.file_name = '+DATA'
-      }else{
-        this.setDefaultFileDirectory(this.instId)
-      }
-      // console.log(this.instId)
+      this.$refs.orabaseinfo.getDatabaseInfo();
+      this.wsServer = this.common.getWsServer();
     }
   }
 </script>

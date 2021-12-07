@@ -6,7 +6,8 @@
     <el-row>
       <el-col :span="5">
         <el-button @click="autoReflashClick(false)">{{ clickText }}</el-button>
-        <el-button style="float: right;margin-bottom: 10px;" type="danger" @click="killSession()">kill选中会话
+        <el-button style="float: right;margin-bottom: 10px;" type="danger" :disabled="bntSessionKill"
+                   @click="killSession()" >kill选中会话
         </el-button>
       </el-col>
       <el-col :span="19">
@@ -19,15 +20,15 @@
           <el-table-column type="selection" width="60"></el-table-column>
           <el-table-column prop="sid" label="sid" ></el-table-column>
           <el-table-column prop="serial" label="serial#" ></el-table-column>
-          <el-table-column prop="username" label="username" ></el-table-column>
-          <el-table-column prop="status" label="status"></el-table-column>
-          <el-table-column prop="machine" label="machine"></el-table-column>
+          <el-table-column prop="username" label="用户名" ></el-table-column>
+          <el-table-column prop="status" label="状态"></el-table-column>
+          <el-table-column prop="machine" label="连接主机"></el-table-column>
           <el-table-column prop="sql_id" label="sql_id"></el-table-column>
-          <el-table-column prop="sql_child_number" label="sql_child_number"></el-table-column>
-          <el-table-column prop="row_wait_obj#" label="row_wait_obj#"></el-table-column>
-          <el-table-column prop="event" label="event"></el-table-column>
-          <el-table-column prop="last_call_et" label="last_call_et"></el-table-column>
-          <el-table-column prop="sql_text" label="sql_text">
+<!--          <el-table-column prop="sql_child_number" label="sql_child_number"></el-table-column>-->
+<!--          <el-table-column prop="row_wait_obj#" label="row_wait_obj#"></el-table-column>-->
+          <el-table-column prop="event" label="等待事件"></el-table-column>
+          <el-table-column prop="last_call_et" label="执行时间"></el-table-column>
+          <el-table-column prop="sql_text" label="执行sql">
             <template slot-scope="scope">
               <el-popover
                 placement="right"
@@ -51,20 +52,6 @@
         </el-table>
       </el-col>
     </el-row>
-
-    <!--sql执行提示界面-->
-    <el-dialog title="SQL执行" visible v-if="dialogExecSqlShow" @close="dialogExecSqlShow = false"
-               :close-on-click-modal="false" width="50%" append-to-body>
-      <div v-html="execSql"></div>
-      <div slot="footer" style="text-align: center">
-        <el-button type="text" @click.native="dialogExecSqlShow = false">取消</el-button>
-        <el-button type="info" v-clipboard:copy="execSql.replaceAll('<br/>','\n')"
-                   v-clipboard:success="onCopy"
-                   v-clipboard:error="onError">复制
-        </el-button>
-        <el-button type="danger" @click.native="">直接执行</el-button>
-      </div>
-    </el-dialog>
   </div>
 </template>
 
@@ -73,15 +60,16 @@
     props: ['instId'],
     data() {
       return{
+        bntSessionKill: false,
         sessionTableData: [],
         flag: true,
         listLoading: false,
         clickText:'5秒自动刷新',
-        dialogExecSqlShow: false,
-        execSql: '',
+        timer:'',
       }
     },
     methods: {
+      //获取活跃会话
       getActiveSessions(instId=this.instId){
         if (this.flag){
           this.flag = false,
@@ -91,53 +79,50 @@
               params: {
                 id: instId,
                 tab: 'session',
+                item: 'activeSessionSql,activeNameList,activeData',
               }
             }).then((res) => {
                 this.sessionTableData = res.result.activedata;
                 this.listLoading = false;
               }, (response) => {
+                this.listLoading = false;
                 this.$message({type: 'error',message: '获取信息失败，原因：' + response.result})
               }
             )
         }
       },
+      //刷新
       reflashClick () {
         this.flag = true;
         this.getActiveSessions()
       },
+      //获取kill session的sql
       killSession(){
         var mulSel = this.$refs.sessionMultipleTable.selection
         if(mulSel.length>0){
-          this.execSql = '';
+          var execSql = '';
           for(var i=0;i<mulSel.length;i++){
-            this.execSql = this.execSql + 'alter system kill session \'' + mulSel[i].sid + ','
+            execSql = execSql + 'alter system kill session \'' + mulSel[i].sid + ','
               + mulSel[i].serial + '\' immediate;' + "<br/>"
           }
-          this.dialogExecSqlShow = true
+          this.$emit('showExecSql',execSql)
         }else{
           this.$message({type: 'warning',message: '您没有选中任何内容！'});
         }
       },
-      onCopy(){
-        this.$message.success('复制成功')
-      },
-      onError(){
-        this.$message.console.error('复制失败');
-      },
+      //设置定时刷新
       createTimer(){
         this.timer = setInterval(() => {
-          this.flag = true;
-          this.getActiveSessions();
+          this.reflashClick()
         }, 5000);
       },
+      //停止定时刷新
       stopReflash() {
         clearInterval(this.timer);
       },
+      //改变定时刷新按钮状态及定时任务
       autoReflashClick (is_father) {
-        console.log('i am comming')
-        console.log(is_father)
         if (!is_father){
-          console.log('1111111111111111')
           if (this.clickText == '停止自动刷新') {
             this.clickText = '5秒自动刷新'
             this.stopReflash()
@@ -146,16 +131,23 @@
             this.createTimer()
           }
         }else{
-          console.log('2222222222222222222')
           if (this.clickText == '停止自动刷新') {
             this.clickText = '5秒自动刷新'
             this.stopReflash()
           }
         }
-      }
+      },
+      //复制成功
+      onCopy(){
+        this.$message.success('复制成功')
+      },
+      //复制失败
+      onError(){
+        this.$message.console.error('复制失败');
+      },
     },
     mounted() {
-      this.getActiveSessions()
+      this.bntSessionKill = this.common.has_permission('operate_session_kill')
     }
   }
 </script>

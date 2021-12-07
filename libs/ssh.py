@@ -9,6 +9,10 @@ import socket
 import sys
 from threading import Thread
 from .utils import isExist
+from inst.models import *
+from .dbs import getMysqlInfo
+import datetime
+import uuid
 
 PingHost=""
 ''' ssh-keygen 命令 '''
@@ -79,6 +83,30 @@ def connHost(ip, user, password=None, port=22, id_rsa_file='~/.ssh/id_rsa'):
     except Exception as e:
         return False ,str(e)
 
+def conn_paramiko(ip, username='root', port=22, passwd=None, prifile='/root/.ssh/id_rsa', clienttype='ssh'):
+    """
+    :fun : 连接paramiko
+    :param ip: 远程主机ip
+    :param port: 远程主机端口
+    :param username: 远程主机用户名
+    :param passwd: 远程主机用户密码
+    :param private: 密钥文件
+    :param clienttype: 连接客户端类型
+    :return:连接客户端
+    """
+    tran = paramiko.Transport((ip, port))
+    if passwd:
+        tran.connect(username=username, password=passwd)
+    else:
+        private = paramiko.RSAKey.from_private_key_file(prifile)
+        tran.connect(username=username, pkey=private)
+    if clienttype == 'ssh':
+        client = paramiko.SSHClient()
+        client._transport = tran
+        return client
+    else:
+        return paramiko.SFTPClient.from_transport(tran)
+
 #配置服务到主机的免密
 def configAuthorized(ip, user, password, port=22):
     try:
@@ -105,7 +133,6 @@ def configAuthorized(ip, user, password, port=22):
         return str(e)
 
     #初始化ssh连接
-
 
 def init_ssh():
     server = paramiko.SSHClient()
@@ -248,6 +275,25 @@ def AuthSShKey(file):
             write_key(write_List,kcs,server)
     print("程序执行完毕，将在5s后退出")
     time.sleep(5)
+
+#获取binlog文件最后修改时间
+def getBinlogLastModifyTime(instId,sourData):
+    baseDir = getMysqlInfo(instId,'getbinlogbasedir')[0][1].split('/')
+    del baseDir[-1]
+    baseDir = '/'.join(baseDir) + '/'
+    inst = Instance.objects.filter(id=instId).first()
+    ssh = conn_paramiko(inst.inst_ip, )
+    data = []
+    for sour in sourData:
+        commd = "date '+%Y-%m-%d %H:%M:%S' -d @$(stat -c %Y " + baseDir + sour['label'] + ")"
+        # print(commd)
+        stdin, stdout, stderr = ssh.exec_command(commd, get_pty=True)
+        # print(stdout.readline().replace('\n',''))
+        tmpData = {'label':sour['label'],'value':sour['value'],
+                   'time':stdout.readline().replace('\n','')}
+        data.append(tmpData)
+    return data
+
 # if __name__=='__main__':
 #     multiprocessing.freeze_support()
 #     paras=argparse.ArgumentParser()

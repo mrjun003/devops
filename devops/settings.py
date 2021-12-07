@@ -14,11 +14,16 @@ from pathlib import Path
 import os
 import re
 
-CELERY_BROKER_URL = 'redis://127.0.0.1:6379/8'
-# CELERY_TIMEZONE='Asia/Shanghai'  #并没有北京时区，与下面TIME_ZONE应该一致
-# BROKER_URL='redis://192.168.8.152:6379/8'  #任何可用的redis都可以，不一定要在django server运行的主机上
-# CELERYBEAT_SCHEDULER = 'djcelery.schedulers.DatabaseScheduler'  ###
-
+# Redis配置
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        # "BACKEND": "channels.layers.InMemoryChannelLayer",
+        "CONFIG": {
+            "hosts": ["redis://127.0.0.1:6379/0"],
+        },
+    },
+}
 
 LOGGING_DIR = "logs"
 if not os.path.exists(LOGGING_DIR):
@@ -105,13 +110,17 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    # 'switchdb',
     'account',
-    # 'inst',
-    # 'devops',
+    'inst',
+    'devops',
     'corsheaders',# pip install django-cors-headers 这个是为了防止跨域，具体请另查资料，我这里就不赘述了。
     'rest_framework', # pip install djangorestframework 方便我们写后端接口
+    'channels',
+    'django_crontab',
 ]
 
+ASGI_APPLICATION = "devops.routing.application"
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -152,14 +161,21 @@ WSGI_APPLICATION = 'devops.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/3.2/ref/settings/#databases
 
+#DATABASES = {
+#    'default': {
+#        'ENGINE': 'django.db.backends.sqlite3',
+#        'NAME': BASE_DIR / 'db.sqlite3',
+#    }
+#}
+
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',  # 默认
-        'NAME': 'devops',  # 连接的数据库
+        'NAME': 'db_devops',  # 连接的数据库
         'HOST': '192.168.8.152',  # mysql的ip地址
         'PORT': 3306, # mysql的端口
-        'USER': 'devops',  # mysql的用户名
-        'PASSWORD': 'devops'  # mysql的密码
+        'USER': 'devoper',  # mysql的用户名
+        'PASSWORD': 'ora123'  # mysql的密码
     }
 }
 
@@ -179,6 +195,11 @@ USE_L10N = True
 
 SECRET_KEY = 'aaa'
 
+AUTHENTICATION_EXCLUDES = (
+    '/account/users/login/',
+    re.compile('/.*'),
+)
+
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.2/howto/static-files/
 
@@ -193,11 +214,11 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 CORS_ALLOW_CREDENTIALS = True
 
 CORS_ALLOW_CREDENTIALS = True # 允许携带cookie
-# CORS_ORIGIN_WHITELIST = ( # 设置白名单
-#     'http://127.0.0.1:8080',
-#     'http://localhost:8080',
-#     'http://192.168.8.156:8080',
-# )
+CORS_ORIGIN_WHITELIST = ( # 设置白名单
+    'http://127.0.0.1:8080',
+    'http://localhost:8080',
+    'http://192.168.8.156:8080',
+)
 
 CORS_ALLOW_METHODS = ( # 设置请求方法
     'DELETE',
@@ -233,3 +254,14 @@ APPEND_SLASH=False
 
 CORS_ORIGIN_ALLOW_ALL=True
 CORS_ORIGIN_WHITELIST = ("http://*",)
+
+CELERY_BROKER_URL = 'redis://127.0.0.1:6379/8'
+CELERY_RESULT_BACKEND = 'redis://127.0.0.1:6379/7'
+CELERY_RESULT_SERIALIZER = 'json'
+# celery内容等消息的格式设置
+CELERY_ACCEPT_CONTENT = ['application/json', ]
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_RESULT_SERIALIZER = 'json'
+
+# celery时区设置，使用settings中TIME_ZONE同样的时区
+CELERY_TIMEZONE = TIME_ZONE

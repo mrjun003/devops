@@ -1,35 +1,18 @@
 <template>
   <div>
     <el-row>
-      <el-divider style="margin-bottom: 10px;"><span class="span">用户详情</span></el-divider>
-    </el-row>
-    <el-row>
-      <el-col>
-        <el-button style="float: right;margin-bottom: 10px;" type="success" plain @click="reflashClick">刷新</el-button>
-      </el-col>
+      <el-divider style="margin-bottom: 10px;"><span class="span">会话连接使用情况</span></el-divider>
     </el-row>
     <el-row>
       <el-col :span="24">
-        <el-table :data="userTableData" stripe border v-loading="listLoading" style="width: 100%" max-height="500">
+        <el-table :data="resourceSessionTableData" stripe border
+                  v-loading="listLoading" style="width: 100%">
           <el-table-column type="index" width="60"></el-table-column>
-          <el-table-column prop="username" label="用户名" ></el-table-column>
-          <el-table-column prop="account_status" label="用户状态" >
-            <template slot-scope="scope">
-              <el-tag :type="scope.row.account_status == 'OPEN' ? 'success' : 'danger'" size="small">
-                {{ scope.row.account_status }}
-              </el-tag>
-            </template>
-          </el-table-column>
-          <el-table-column prop="lock_date" label="上锁时间" ></el-table-column>
-          <el-table-column prop="expiry_date" label="过期时间" ></el-table-column>
-          <el-table-column prop="default_tablespace" label="默认表空间"></el-table-column>
-          <el-table-column prop="created" label="创建时间"></el-table-column>
-          <el-table-column label="操作" width="150">
-            <template slot-scope="scope">
-              <el-button type="primary" size="small" @click="instDetail(scope.row.id,scope.row.inst_type)">详情</el-button>
-              <el-button type="danger" size="small" @click="instDelete(scope.row.id ,scope.row.inst_ip)">删除</el-button>
-            </template>
-          </el-table-column>
+          <el-table-column prop="name" label="name" ></el-table-column>
+          <el-table-column prop="current" label="当前连接数"></el-table-column>
+          <el-table-column prop="max" label="最大使用连接数"></el-table-column>
+          <el-table-column prop="init" label="可分配连接数"></el-table-column>
+          <el-table-column prop="limit" label="最大连接数"></el-table-column>
         </el-table>
       </el-col>
     </el-row>
@@ -41,38 +24,36 @@
     props: ['instId'],
     data() {
       return{
-        userTableData: [],
+        resourceSessionTableData: [],
         flag: true,
         listLoading: false,
       }
     },
     methods: {
-      getUsers(instId=this.instId){
+      getResourceSession(instId=this.instId){
         if (this.flag){
           this.flag = false,
             this.listLoading = true,
-            this.userTableData = [],
+            this.resourceSessionTableData = [],
             this.$http.get('/api/inst/getinfo/', {
               params: {
                 id: instId,
-                tab: 'user',
+                tab: 'session',
+                item: 'resourceSessionSql,resourceSession,resourceSessionData',
               }
             }).then((res) => {
-                this.userTableData = res.result.userdata
-                this.listLoading = false;
+              this.resourceSessionTableData = res.result.resourcesessiondata
+              this.listLoading = false;
               }, (response) => {
+                this.listLoading = false;
                 this.$message({type: 'error',message: '获取信息失败，原因：' + response.result})
               }
             )
         }
       },
-      reflashClick () {
-        this.flag = true;
-        this.getUsers()
-      },
     },
     mounted() {
-      this.getUsers()
+      // this.getResourceSession()
     }
   }
 </script>

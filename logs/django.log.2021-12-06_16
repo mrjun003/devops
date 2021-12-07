@@ -1,0 +1,2 @@
+[INFO][2021-12-06 16:18:03,648][57] : admin:{'sql': 'drop tablespace TTT including contents and datafiles cascade constraints;', 'reason': '', 'status': 'Successed', 'pct': 100}
+[INFO][2021-12-06 16:19:09,765][57] : admin:{'sql': "create tablespace tt datafile '/oradata/tt.dbf' size 1G autoextend off;", 'reason': '', 'status': 'Successed', 'pct': 100}

@@ -1,13 +1,14 @@
 import ViewSql from './ViewSql.vue';
-import SqlApp from './SqlApp.vue'
-import SlowSql from './SlowSql.vue'
-import Binlog2Sql from './Binlog2Sql.vue'
-import Install from './Install'
-import Users from './Users'
-import Databases from './Databases'
-import SwitchOra from './SwitchOra'
-import AnalyseAwr from './AnalyseAwr'
-import CheckDb from './CheckDb'
+import SqlApp from './SqlApp.vue';
+import SlowSql from './SlowSql.vue';
+import Binlog2Sql from './Binlog2Sql.vue';
+import Install from './Install';
+import Users from './Users';
+import Databases from './Databases';
+import SwitchOra from './SwitchOra';
+import AnalyseAwr from './AnalyseAwr';
+import CheckDb from './CheckDb';
+import SwitchOraDetail from "./SwitchOraDetail";
 
 export default [
   {
